@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Vuejs</title>
+	<style>
+	
+		#card{
+			border: 1px solid lightgrey;
+			border-radius: 10px;
+			width: 400px;
+		}
+
+		#card header{
+			background: orange;
+			color:white;
+			height:40px;
+			text-align: center;
+			padding-top: 10px;
+			font-size: 150%;
+			border-radius: 10px 10px 0 0;
+		}
+		#card div{
+			text-align: center;
+			font-size: 110%;
+			padding: 10px;
+
+		}
+		ul{
+			padding: 0;
+		}
+		#card li{
+			padding-left: none;
+			padding: 5px;
+			border:1px dashed orange;
+			list-style: none;
+		}
+		#card input{
+			font-size: 200%;
+		}
+	</style>
+</head>
+<body>
+	<div id="card">
+		<header>{{title}}</header>
+		<div>
+			<input v-on:keydown.enter="addPizza(input.value)" id="input" placeholder="nueva pizza" type="text">
+			<img width="100px" v-if="!items.length > 0" src="https://cdn.dribbble.com/users/144860/screenshots/1911674/12.gif" alt="Loading">
+			<ul>
+				<li v-for="(item,i) in items">
+					<button v-on:click="deletePizza(i)">X</button>
+					{{item.text}}
+				</li>
+			</ul>
+		</div>
+	</div>
+	
+
+	<!--Firebase imports-->
+
+	
+<script src="https://www.gstatic.com/firebasejs/4.13.0/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyCF2ZZ2fYz9knhpiF1Qd81ebj4DpKbpQvA",
+    authDomain: "ironhackdemo.firebaseapp.com",
+    databaseURL: "https://ironhackdemo.firebaseio.com",
+    projectId: "ironhackdemo",
+    storageBucket: "ironhackdemo.appspot.com",
+    messagingSenderId: "987657664062"
+  };
+  firebase.initializeApp(config);
+</script>
+
+	<!--Firebase imports-->
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.min.js"></script>
+	<script>
+	var card = new Vue({
+		el: '#card',
+		data: {
+			title:"Pizzas",
+			items:[]
+		},
+		created(){
+			firebase.database().ref('pizzas').once('value')
+			.then(snap=>this.items=snap.val())
+			.catch(e=>alert(e.message));
+		},
+		methods:{
+			addPizza(value){
+				this.items.push({text:value});
+				input.value = "";
+				this.updateFirebase();
+			},
+			deletePizza(index){
+				if(!confirm("seguro?")) return;
+				this.items.splice(index,1);
+				this.updateFirebase();
+			},
+			updateFirebase(){
+				var updates = {pizzas:this.items};
+				firebase.database().ref().update(updates);
+			}
+		}
+	});
+
+	</script>
+</body>
+</html>
